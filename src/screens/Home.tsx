@@ -1,9 +1,17 @@
-import { HStack, Heading, IconButton, Text, VStack, useTheme } from 'native-base';
+import { useState } from 'react';
+import { HStack, Heading, IconButton, Text, VStack, useTheme, FlatList } from 'native-base';
 import { SignOut } from 'phosphor-react-native';
 import Logo from '../assets/logo_secondary.svg';
 import { Filter } from '../components/Filter'
 
 export function Home() {
+    const [statusSelected, setStatusSelected] = useState<'open' | 'closed'>('open');
+    const [orders, setOrders] = useState([{
+        id: '123',
+        patrimony: '123456',
+        when: '01/06/2023 as 10:00',
+        status: 'open'
+    }]);
     const { colors } = useTheme();
 
     return (
@@ -31,16 +39,26 @@ export function Home() {
                         3
                     </Text>
                 </HStack>
-                <HStack>
+                <HStack space={3} mb={8}>
                     <Filter 
                         type="open"
                         title="em andamento"
+                        onPress={() => setStatusSelected('open')}
+                        isActive={statusSelected === 'open'}
                     />
                     <Filter 
                         type="closed"
                         title="finalizados"
+                        onPress={() => setStatusSelected('closed')}
+                        isActive={statusSelected === 'closed'}
                     />
                 </HStack>
+
+                <FlatList
+                    data={orders}
+                    keyExtractor={item => item.id}
+                    renderItem={({ item }) => <Text color="white">{item.patrimony}</Text>}
+                />
             </VStack>
         </VStack>
     );
