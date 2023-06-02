@@ -1,18 +1,32 @@
 import { useState } from 'react';
-import { HStack, Heading, IconButton, Text, VStack, useTheme, FlatList } from 'native-base';
-import { SignOut } from 'phosphor-react-native';
+import { HStack, Heading, IconButton, Text, VStack, useTheme, FlatList, Center } from 'native-base';
+import { SignOut, ChatTeardropText } from 'phosphor-react-native';
 import Logo from '../assets/logo_secondary.svg';
 import { Filter } from '../components/Filter'
+import { Order, OrderProps } from '../components/Order';
+import { Button } from '../components/Button';
+import { useNavigation } from '@react-navigation/native'
 
 export function Home() {
     const [statusSelected, setStatusSelected] = useState<'open' | 'closed'>('open');
-    const [orders, setOrders] = useState([{
-        id: '123',
-        patrimony: '123456',
-        when: '01/06/2023 as 10:00',
-        status: 'open'
-    }]);
+    const [orders, setOrders] = useState<OrderProps[]>([
+        {
+            id: '123',
+            patrimony: '123456',
+            when: '02/06/2023 às 14:00',
+            status: 'open'
+        }
+    ]);
     const { colors } = useTheme();
+    const navigation = useNavigation();
+
+    function handleNewOrder(){
+        navigation.navigate('new');
+    }
+
+    function handleOpenDetails(orderId: string){
+        navigation.navigate('details', { orderId })
+    }
 
     return (
         <VStack flex={1} pb={6} bg="gray.700">
@@ -33,10 +47,10 @@ export function Home() {
             <VStack flex={1} px={6}>
                 <HStack w="full" mt={8} mb={4} justifyContent="space-between" alignItems="center">
                     <Heading color="gray.100">
-                        Meus chamados
+                        Solicitações
                     </Heading>
                     <Text color="gray.200">
-                        3
+                        {orders.length}
                     </Text>
                 </HStack>
                 <HStack space={3} mb={8}>
@@ -53,12 +67,23 @@ export function Home() {
                         isActive={statusSelected === 'closed'}
                     />
                 </HStack>
-
                 <FlatList
                     data={orders}
                     keyExtractor={item => item.id}
-                    renderItem={({ item }) => <Text color="white">{item.patrimony}</Text>}
+                    renderItem={({ item }) => <Order data={item} onPress={() => handleOpenDetails(item.id)}/>}
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 100 }}
+                    ListEmptyComponent={() => (
+                        <Center>
+                            <ChatTeardropText color={colors.gray[300]} size={40} />
+                            <Text color="gray.300" fontSize="xl" mt={6} textAlign="center">
+                                Você ainda não possui {'\n'}
+                                solicitações {statusSelected === 'open' ? 'em andamento' : 'finalizadas'}
+                            </Text>
+                        </Center>
+                    )}
                 />
+                <Button title="Nova solicitação" onPress={handleNewOrder}/>
             </VStack>
         </VStack>
     );
